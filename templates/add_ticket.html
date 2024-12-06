@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a New Ticket</title>
+</head>
+<body>
+    <h1>Add a New Ticket</h1>
+    <form method="POST">
+        <!-- Ticket ID will be generated automatically, so we don't need to show this field in the form -->
+
+        <!-- Destination field -->
+        <label for="destination">Destination:</label>
+        <input type="text" name="destination" required><br>
+
+        <!-- Price field -->
+        <label for="price">Price:</label>
+        <input type="number" name="price" required><br>
+
+        <!-- Status selection -->
+        <label for="statuses">Status:</label>
+        <select name="statuses" required>
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+        </select><br>
+
+        <!-- Submit button -->
+        <button type="submit">Add Ticket</button>
+    </form>
+</body>
+</html>

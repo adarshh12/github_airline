@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airline Tickets</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Airline Tickets</a>
+            <div class="d-flex">
+                <a class="btn btn-outline-light" href="/home">Home</a>
+                <a class="btn btn-outline-light" href="/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="container text-center my-5">
+        <h1 class="display-4">Available Airline Tickets</h1>
+        <p class="lead">Find your next travel destination with ease</p>
+    </div>
+
+    <!-- Add Ticket Section -->
+    <div class="container my-4">
+        <h2 class="mb-3">Add New Ticket</h2>
+        <form method="POST" action="{{ url_for('add_ticket') }}">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <input type="text" class="form-control" name="source" placeholder="Source" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <input type="text" class="form-control" name="destination" placeholder="Destination" required>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <input type="number" class="form-control" name="price" placeholder="Price" required>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <select class="form-control" name="statuses">
+                        <option value="available">Available</option>
+                        <option value="booked">Booked</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" type="submit">Add Ticket</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Available Tickets Section -->
+    <div class="container">
+        <h2 class="mb-4">Available Tickets</h2>
+        <div class="row" id="ticketCards">
+            {% for ticket in tickets %}
+                <div class="col-12 col-md-4 mb-4 ticket-card" data-status="{{ ticket.get('statuses', 'unknown') }}">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ ticket.get('source', 'Unknown Source') }} → {{ ticket.get('destination', 'Unknown Destination') }}
+                            </h5>
+                            <p class="card-text">Price: ${{ ticket.get('price', 'N/A') }}</p>
+                            <p class="card-text">Ticket ID: {{ ticket.get('ticket_id', 'N/A') }}</p>
+                            <p class="card-text">
+                                <span class="badge 
+                                    {% if ticket.get('statuses') == 'available' %}
+                                        bg-success
+                                    {% elif ticket.get('statuses') == 'booked' %}
+                                        bg-danger
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}
+                                ">
+                                    {{ ticket.get('statuses', 'unknown').capitalize() }}
+                                </span>
+                            </p>
+                            {% if ticket.get('statuses') == 'available' %}
+                                <form method="POST" action="{{ url_for('book_ticket', ticket_id=ticket.get('ticket_id')) }}">
+                                    <button class="btn btn-success" type="submit">Book Now</button>
+                                </form>
+                            {% elif ticket.get('statuses') == 'booked' %}
+                                <button class="btn btn-secondary" disabled>
+                                    Booked by {{ ticket.get('users', 'N/A') }}
+                                </button>
+                            {% else %}
+                                <button class="btn btn-secondary" disabled>Status Unknown</button>
+                            {% endif %}
+                            
+                            {% if ticket.get('users') == session['username'] %}
+                                <!-- Enable the delete button only if the logged-in user is the one who booked the ticket -->
+                                <form method="POST" action="{{ url_for('delete_ticket', ticket_id=ticket.get('ticket_id')) }}" style="display:inline;">
+                                    <button class="btn btn-danger mt-2" type="submit">Delete</button>
+                                </form>
+                            {% else %}
+                                <!-- Disable the delete button for tickets booked by other users -->
+                                <button class="btn btn-danger mt-2" disabled>Delete</button>
+                            {% endif %}
+
+                            {% if ticket.get('users') == session['username'] %}
+                                <!-- Enable the update button only if the logged-in user is the one who booked the ticket -->
+                                <button class="btn btn-warning mt-2" data-bs-toggle="modal" data-bs-target="#updateTicketModal{{ ticket.get('ticket_id') }}">
+                                    Update
+                                </button>
+                            {% else %}
+                                <!-- Disable the update button for tickets booked by other users -->
+                                <button class="btn btn-warning mt-2" disabled>Update</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Update Ticket Modal -->
+                <div class="modal fade" id="updateTicketModal{{ ticket.get('ticket_id') }}" tabindex="-1" aria-labelledby="updateTicketModalLabel{{ ticket.get('ticket_id') }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="updateTicketModalLabel{{ ticket.get('ticket_id') }}">Update Ticket</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="POST" action="{{ url_for('update_ticket', ticket_id=ticket.get('ticket_id')) }}">
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="source" class="form-label">Source</label>
+                                        <input type="text" class="form-control" name="source" value="{{ ticket.get('source') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="destination" class="form-label">Destination</label>
+                                        <input type="text" class="form-control" name="destination" value="{{ ticket.get('destination') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="price" class="form-label">Price</label>
+                                        <input type="number" class="form-control" name="price" value="{{ ticket.get('price') }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="statuses" class="form-label">Status</label>
+                                        <select class="form-control" name="statuses">
+                                            <option value="available" {% if ticket.get('statuses') == 'available' %}selected{% endif %}>Available</option>
+                                            <option value="booked" {% if ticket.get('statuses') == 'booked' %}selected{% endif %}>Booked</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

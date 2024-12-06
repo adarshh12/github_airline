@@ -1,0 +1,23 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to right, #f3f4f7, #ffffff);
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Ticket</title>
+</head>
+<body>
+    <h1>Update Ticket</h1>
+    <form method="POST">
+        <label for="destination">Destination:</label>
+        <input type="text" name="destination" value="{{ ticket['destination'] }}" required><br>
+        
+        <label for="price">Price:</label>
+        <input type="number" name="price" value="{{ ticket['price'] }}" required><br>
+        
+        <label for="statuses">Status:</label>
+        <select name="statuses" required>
+            <option value="available" {% if ticket['statuses'] == 'available' %}selected{% endif %}>Available</option>
+            <option value="booked" {% if ticket['statuses'] == 'booked' %}selected{% endif %}>Booked</option>
+        </select><br>
+        
+        <button type="submit">Update Ticket</button>
+    </form>
+</body>
+</html>
